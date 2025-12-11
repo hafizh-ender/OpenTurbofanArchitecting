@@ -174,6 +174,13 @@ class ArchitectingProblem:
             results = self.evaluate_architecture(architecture)
             obj_values, con_values, met_values = self.extract_metrics(architecture, imputed_design_vector, results)
         except:
+            # Evaluation failed: return NaN values
+            print('Evaluation of architecture failed!')
+            
+            # Print traceback for debugging
+            import traceback
+            traceback.print_exc()
+            
             obj_values = np.zeros((len(self.opt_objectives),))*np.nan
             con_values = np.zeros((len(self.opt_constraints),))*np.nan
             met_values = np.zeros((len(self.opt_metrics),))*np.nan
