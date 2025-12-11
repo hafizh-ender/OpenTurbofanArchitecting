@@ -20,8 +20,8 @@ from setuptools import setup, find_packages
 
 if __name__ == '__main__':
     # Linking to a custom repository unfortunately only works when installing using pip
-    if 'pip' not in __file__:  # https://stackoverflow.com/a/10386262
-        raise RuntimeError('Install using pip: pip install .')
+    # if 'pip' not in __file__:  # https://stackoverflow.com/a/10386262
+    #     raise RuntimeError('Install using pip: pip install .')
 
     setup(
         name='open_turb_arch',
@@ -40,15 +40,16 @@ if __name__ == '__main__':
             'License :: OSI Approved :: Apache Software License',
         ],
         install_requires=[
-            'pytest',
-            'dataclasses',
+            'pytest==6.2.5',
+            # 'dataclasses', # only for python 3.6
             'pycycle @ git+https://github.com/jbussemaker/pyCycle.git#egg=pycycle',
-            'openmdao==3.4.0',
-            'ordered_set',
-            'numpy',
-            'Platypus-Opt',
-            'pymoo',
-            'lxml',
+            'openmdao @ git+https://github.com/hafizh-ender/OpenMDAO.git@3.4.0-new',
+            'ordered-set==4.0.2',
+            'numpy==1.21.2',
+            'Platypus-Opt==1.0.4',
+            'pymoo==0.4.2.2',
+            'lxml==4.6.3',
+            'networkx==2.5.1',
         ],
         python_requires='>=3.6',
         packages=find_packages(),
