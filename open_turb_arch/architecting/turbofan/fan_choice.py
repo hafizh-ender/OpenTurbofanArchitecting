@@ -36,7 +36,7 @@ class FanChoice(ArchitectingChoice):
     bpr_bounds: Tuple[float, float] = (2., 12.5)  # Bypass ratio design bounds
 
     fixed_fpr: float = None  # Fix the fan pressure ratio
-    fpr_bounds: Tuple[float, float] = (1.1, 1.8)
+    fpr_bounds: Tuple[float, float] = (1.1, 3.5)
 
     fan_eff: float = None  # Efficiency of the fan
     bypass_v_loss_coefficient: float = None  # Flow velocity loss coefficient of the bypass nozzle

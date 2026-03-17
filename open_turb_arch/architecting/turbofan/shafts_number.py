@@ -33,12 +33,12 @@ class ShaftChoice(ArchitectingChoice):
     fixed_number_shafts: int = None  # Fix the number of added shafts
 
     fixed_opr: float = None  # Fix the overall pressure ratio of the engine
-    opr_bounds: Tuple[float, float] = (1.1, 60)  # Overall pressure ratio bounds
+    opr_bounds: Tuple[float, float] = (10., 85.)  # Overall pressure ratio bounds
 
     fixed_pr_compressor_ip: float = None  # Fix the percentage the IP performs from the overall core pressure ratio
     fixed_pr_compressor_lp: float = None  # Fix the percentage the LP performs from the overall core pressure ratio
 
-    pr_compressor_bounds: Tuple[float, float] = (0.1, 0.9)  # Percentage pressure ratio bounds
+    pr_compressor_bounds: Tuple[float, float] = (0.05, 0.5)  # Percentage pressure ratio bounds
 
     fixed_rpm_shaft_hp: float = None  # Fix the HP shaft rpm
     fixed_rpm_shaft_ip: float = None  # Fix the IP shaft rpm

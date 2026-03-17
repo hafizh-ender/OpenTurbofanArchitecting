@@ -62,7 +62,7 @@ class CoolingBleedChoice(ArchitectingChoice):
     fix_ab_ll_frac_w: float = None  # Fix the cooling bleed portion of the LPT as target of the LPC intra-bleed
 
     # Bounds of cooling bleed mass flow
-    total_bounds: Tuple[float, float] = (0., 0.1)  # Total cooling bleed portion bounds
+    total_bounds: Tuple[float, float] = (0., 0.15)  # Total cooling bleed portion bounds
     frac_w_bounds: Tuple[float, float] = (0., 1.0)  # Cooling bleed portion bounds
 
     def get_design_variables(self) -> List[DesignVariable]:
