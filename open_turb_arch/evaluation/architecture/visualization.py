@@ -158,6 +158,8 @@ class ArchitectureVisualizer:
         i_compressor = 0
         outer_coords = []
         while True:
+            print("Drawing element: %s" % arch_el.name)
+            
             if isinstance(arch_el, Compressor):
                 end_height = current_height*compressor_height_fraction
                 compression_frac = 1-((end_height-burner_height)/(compressor_height-burner_height))
@@ -224,8 +226,8 @@ class ArchitectureVisualizer:
                 if len(i_shaft) != 1:
                     raise RuntimeError('Turbine assigned to 0 or more than 1 shafts: %r' % arch_el)
                 i_shaft = i_shaft[0]
-                if i_shaft not in shaft_color:
-                    raise RuntimeError('Turbine connected to shaft that is not connected to compressor: %r' % arch_el)
+                # if i_shaft not in shaft_color:
+                    # raise RuntimeError('Turbine connected to shaft that is not connected to compressor: %r' % arch_el)
                 color, fill_color = shaft_color[i_shaft]
 
                 shaft_x_start[i_shaft] = min(shaft_x_start.get(i_shaft, 999999), x)
@@ -281,7 +283,8 @@ class ArchitectureVisualizer:
                 if arch_el.target is None:
                     break
 
-            elif isinstance(arch_el, (Bleed, Duct)):
+            # elif isinstance(arch_el, (Bleed, Duct)):
+            elif isinstance(arch_el, (BleedInter, Duct)):
                 pass
 
             else:
