@@ -114,15 +114,42 @@ class ShaftChoice(ArchitectingChoice):
         pr_percentages = [pr_compressor_ip if number_shafts >= 2 else 0, pr_compressor_lp if number_shafts == 3 else 0]
         pr_percentages = [1/3, 1/3] if pr_percentages[0]+pr_percentages[1] >= 1 else pr_percentages
 
-        # Calculate the pressure ratio for each compressor based on number of shafts and pressure ratio percentages
-        if pr_percentages[0] == 0 and pr_percentages[1] == 0:  # 1 shaft
-            pr_base = opr_core
-        elif pr_percentages[1] == 0:  # 2 shafts
-            pr_base = (opr_core/(pr_percentages[0]-pr_percentages[0]**2))**(1/2)
-        else:  # 3 shafts
-            pr_base = (opr_core/(pr_percentages[0]*pr_percentages[1]-pr_percentages[0]**2*pr_percentages[1]-pr_percentages[0]*pr_percentages[1]**2))**(1/3)
-        pr_compressor = [pr_base*(1-pr_percentages[0]-pr_percentages[1]), pr_base*pr_percentages[0], pr_base*pr_percentages[1]]
-
+        # # Calculate the pressure ratio for each compressor based on number of shafts and pressure ratio percentages
+        # if pr_percentages[0] == 0 and pr_percentages[1] == 0:  # 1 shaft
+        #     pr_base = opr_core
+        # elif pr_percentages[1] == 0:  # 2 shafts
+        #     pr_base = (opr_core/(pr_percentages[0]-pr_percentages[0]**2))**(1/2)
+        # else:  # 3 shafts
+        #     pr_base = (opr_core/(pr_percentages[0]*pr_percentages[1]-pr_percentages[0]**2*pr_percentages[1]-pr_percentages[0]*pr_percentages[1]**2))**(1/3)
+        # pr_compressor = [pr_base*(1-pr_percentages[0]-pr_percentages[1]), pr_base*pr_percentages[0], pr_base*pr_percentages[1]]
+        
+        # if number_shafts == 1:
+        #     pr_compressor = [opr_core, 0, 0]
+        # elif number_shafts == 2:
+        #     if pr_percentages[0] == 0:
+        #         pr_compressor = [opr_core, 1, 0]
+        #     else:
+        #         pr_base = (opr_core/(pr_percentages[0]-pr_percentages[0]**2))**(1/2)
+        #         pr_compressor = [pr_base*(1-pr_percentages[0]), pr_base*pr_percentages[0], 0]
+        # else:
+        #     if pr_percentages[0] == 0 and pr_percentages[1] == 0:
+        #         pr_compressor = [opr_core, 1, 0]
+        #     elif pr_percentages[0] == 0:
+        #         pr_base = (opr_core/pr_percentages[1])**(1/2)
+        #         pr_compressor = [pr_base*(1-pr_percentages[1]), 1, pr_base*pr_percentages[1]]
+        #     elif pr_percentages[1] == 0:
+        #         pr_base = (opr_core/pr_percentages[0])**(1/2)
+        #         pr_compressor = [pr_base*(1-pr_percentages[0]), pr_base*pr_percentages[0], 1]
+        #     else:
+        #         pr_base = (opr_core/(pr_percentages[0]*pr_percentages[1]-pr_percentages[0]**2*pr_percentages[1]-pr_percentages[0]*pr_percentages[1]**2))**(1/3)
+        #         pr_compressor = [pr_base*(1-pr_percentages[0]-pr_percentages[1]), pr_base*pr_percentages[0], pr_base*pr_percentages[1]]
+        if number_shafts == 1:
+            pr_compressor = [opr_core, 0, 0]
+        elif number_shafts == 2:
+            pr_compressor = [opr_core**(1-pr_percentages[0]), opr_core**pr_percentages[0], 0]
+        else:
+            pr_compressor = [opr_core**(1-pr_percentages[0]-pr_percentages[1]), opr_core**pr_percentages[0], opr_core**pr_percentages[1]]
+                
         is_active = [True, True, pr_percentages[0], pr_percentages[1], True, number_shafts >= 2, number_shafts == 3]
 
         comp_eff = [self.comp_hp_eff, self.comp_ip_eff, self.comp_lp_eff]
@@ -189,8 +216,10 @@ class ShaftChoice(ArchitectingChoice):
 
             # Define names for added shafts
             shaft_name = 'ip' if number == 0 else 'lp'
-
             # Create new elements: compressor, turbine and shaft
+            
+            # Don't add compressor if pressure ratio is 1
+            # if pr_compressor[number+1] != 1:
             comp_new = Compressor(
                 name='comp_'+shaft_name, map=CompressorMap.AXI_5, pr=pr_compressor[number+1],
                 mach=compressor.mach*1.15, eff=compressor.eff if comp_eff[number+1] is None else comp_eff[number+1],
@@ -201,17 +230,25 @@ class ShaftChoice(ArchitectingChoice):
                 mach=turbine.mach*1.15, eff=turbine.eff if turb_eff[number+1] is None else turb_eff[number+1],
             )
 
+            # if pr_compressor[number+1] != 1:
             shaft_new = Shaft(
                 name='shaft_'+shaft_name, connections=[comp_new, turb_new],
                 rpm_design=rpm_shaft[number+1], power_loss=0.,
             )
+            # else:
+            #     shaft_new = Shaft(
+            #         name='shaft_'+shaft_name, connections=[turb_new],
+            #         rpm_design=rpm_shaft[number+1], power_loss=0.,
+            #     )
 
             # Insert compressor, turbine and shaft into architecture elements list
+            # if pr_compressor[number+1] != 1:
             architecture.elements.insert(architecture.elements.index(compressor), comp_new)
             architecture.elements.insert(architecture.elements.index(turbine)+1, turb_new)
             architecture.elements.insert(architecture.elements.index(shaft), shaft_new)
 
             # Reroute flow from inlet and new compressor
+            # if pr_compressor[number+1] != 1:
             comp_new.target = compressor
 
             # Reroute flow to new turbine and nozzle
