@@ -165,12 +165,18 @@ class ArchitectingProblem:
 
         # Return cached evaluation results
         dv_cache = tuple(imputed_design_vector)
-        # if dv_cache in self._results_cache:
-        #     self._last_eval_id = self._eval_id_cache[dv_cache]
-        #     return copy.copy(self._results_cache[dv_cache])
+        if dv_cache in self._results_cache:
+            self._last_eval_id = self._eval_id_cache[dv_cache]
+            return copy.copy(self._results_cache[dv_cache])
+        
+        initial_turbine_pr = self._an_problem.design_condition.balancer._init_turbine_pr
+        initial_mass_flow = self._an_problem.design_condition.balancer._init_mass_flow
 
         # Evaluate architecture
         try:
+            self._an_problem.design_condition.balancer._init_turbine_pr = (imputed_design_vector[2]/imputed_design_vector[1])**(0.5) # (Initial guess: (OPR/FPR)^0.5)
+            self._an_problem.design_condition.balancer._init_mass_flow = 20 * imputed_design_vector[0]  # (Initial guess: mass flow proportional to fan size)
+            
             results = self.evaluate_architecture(architecture)
             obj_values, con_values, met_values = self.extract_metrics(architecture, imputed_design_vector, results)
         except:
@@ -184,6 +190,21 @@ class ArchitectingProblem:
             obj_values = np.zeros((len(self.opt_objectives),))*np.nan
             con_values = np.zeros((len(self.opt_constraints),))*np.nan
             met_values = np.zeros((len(self.opt_metrics),))*np.nan
+        
+        # Return back to initial guesses
+        self._an_problem.design_condition.balancer._init_turbine_pr = initial_turbine_pr
+        self._an_problem.design_condition.balancer._init_mass_flow = initial_mass_flow
+        
+        if np.nan in obj_values:
+            try:
+                results = self.evaluate_architecture(architecture)
+                obj_values, con_values, met_values = self.extract_metrics(architecture, imputed_design_vector, results)
+            except:
+                print('Re-evaluation of architecture failed!')
+                traceback.print_exc()
+                obj_values = np.zeros((len(self.opt_objectives),))*np.nan
+                con_values = np.zeros((len(self.opt_constraints),))*np.nan
+                met_values = np.zeros((len(self.opt_metrics),))*np.nan
 
         cache = self._results_cache, self._eval_id_cache
         self._results_cache = self._eval_id_cache = None  # To prevent pickling the results cache
