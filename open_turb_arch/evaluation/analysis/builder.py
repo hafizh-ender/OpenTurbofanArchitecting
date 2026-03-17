@@ -142,6 +142,12 @@ class OperatingMetrics:
     t_ab_in: float = None  # Afterburner inlet temperature [degC]
     p_jet: float = None  # Jet nozzle exit pressure [Pa]
     t_jet: float = None  # Jet nozzle exit temperature [degC]
+    
+    p17qpt7: float = None  # Bypass flow total pressure (Pt17) over turbine outlet/nozzle inlet total pressure (Pt7)
+    wrqae2a: float = None  # Reduced mass flow divided by inlet area, where reduced mass flow is defined as mass flow divided by sqrt(temperature)
+    dh4qtt4: float = None  # Enthalpy drop across the high-pressure turbine (HPT) divided by the total temperature at the HPT inlet
+    dh46qtt46: float = None  # Enthalpy drop across the IP turbine (if present) divided by the total temperature at the IP turbine inlet (if present)
+    t_turb_in: float = None  # Turbine inlet temperature for the design condition (should be the same as the target turbine inlet temperature set in the design condition)
 
 
 class ArchitectureCycle(pyc.Cycle):
@@ -289,6 +295,10 @@ class ArchitectureCycle(pyc.Cycle):
         pyc.print_nozzle(problem, self.get_element_names(pyc.Nozzle), file=fp)
 
         pyc.print_shaft(problem, self.get_element_names(pyc.Shaft), file=fp)
+        
+        splitter_names = self.get_element_names(pyc.Splitter)
+        if len(splitter_names) > 0:
+            pyc.print_splitter(problem, splitter_names, file=fp)
 
         gearbox_names = self.get_element_names(pyc.Gearbox)
         if len(gearbox_names) > 0:
@@ -367,6 +377,29 @@ class ArchitectureCycle(pyc.Cycle):
         for nozzle in range(len(nozzles)):
             if nozzles[nozzle].name == 'nozzle_joint':
                 mixed_nozzle = True
+        
+        # Check if there is a splitter in the architecture, if so, we need to get the correct nozzle exit parameters for the performance metrics
+        splitter_present = False
+        splitters = self.architecture.get_elements_by_type(Splitter)
+        for splitter in range(len(splitters)):
+            if splitters[splitter].name == 'splitter':
+                splitter_present = True
+                
+        # Check if there is a fan in the architecture, if so, we need to get the correct inlet area for the performance metrics
+        fan_present = False
+        compressors = self.architecture.get_elements_by_type(Compressor)
+        for compressor in range(len(compressors)):
+            if compressors[compressor].name == 'fan':
+                fan_present = True
+                break
+        
+        # Check if there is an IP turbine in the architecture, if so, we need to get the correct turbine inlet parameters for the performance metrics
+        ip_turbine_present = False
+        turbines = self.architecture.get_elements_by_type(Turbine)
+        for turbine in range(len(turbines)):
+            if turbines[turbine].name == 'turb_ip':
+                ip_turbine_present = True
+                break
 
         return OperatingMetrics(
             fuel_flow=_float(problem.get_val(self.name+'.perf.Wfuel', units=units.MASS_FLOW, get_remote=None)),
@@ -389,6 +422,22 @@ class ArchitectureCycle(pyc.Cycle):
             t_ab_in=_float(problem.get_val('%s.%s.Fl_I:tot:T' % (self.name, 'ab'), units=units.TEMPERATURE, get_remote=None)) if ab_present else 0,
             p_jet=_float(problem.get_val('%s.%s.Fl_O:tot:P' % (self.name, 'nozzle_core' if not mixed_nozzle else 'nozzle_joint'), units=units.PRESSURE, get_remote=None)),
             t_jet=_float(problem.get_val('%s.%s.Fl_O:tot:T' % (self.name, 'nozzle_core' if not mixed_nozzle else 'nozzle_joint'), units=units.TEMPERATURE, get_remote=None)),
+            
+            # Add more values
+            # P17/P7: bypass flow total pressure (Pt17) over turbine outlet/nozzle inlet total pressure (Pt7)
+            p17qpt7=_float(problem.get_val('%s.%s.Fl_O2:tot:P' % (self.name, 'splitter'), units=units.PRESSURE, get_remote=None))/_float(problem.get_val('%s.%s.Fl_O:tot:P' % (self.name, 'nozzle_core' if not mixed_nozzle else 'nozzle_joint'), units=units.PRESSURE, get_remote=None)) if splitter_present else 0,
+            
+            # # WRQAE2A: fan reduced mass flow divided by fan area
+            wrqae2a=(_float(problem.get_val('%s.%s.Wc' % (self.name, 'fan'), units=units.MASS_FLOW, get_remote=None))/_float(problem.get_val('%s.%s.Fl_O:stat:area' % (self.name, 'fan'), units=units.AREA, get_remote=None))),
+            
+            # DHt41/Tt41 ~ DHt4/Tt4: enthalpy drop across the high-pressure turbine (HPT) divided by the total temperature at the HPT inlet
+            dh4qtt4=(_float(problem.get_val('%s.%s.Fl_I:tot:h' % (self.name, 'turbine'), units=units.ENTHALPY, get_remote=None))-_float(problem.get_val('%s.%s.Fl_O:tot:h' % (self.name, 'turbine'), units=units.ENTHALPY, get_remote=None)))/_float(problem.get_val('%s.%s.Fl_I:tot:T' % (self.name, 'turbine'), units='K', get_remote=None)),
+            
+            # DHt46/Tt46Tt4: enthalpy drop across the IP turbine (if present) divided by the total temperature at the IP turbine inlet (if present
+            dh46qtt46=(_float(problem.get_val('%s.%s.Fl_I:tot:h' % (self.name, 'turb_ip'), units=units.ENTHALPY, get_remote=None))-_float(problem.get_val('%s.%s.Fl_O:tot:h' % (self.name, 'turb_ip'), units=units.ENTHALPY, get_remote=None)))/_float(problem.get_val('%s.%s.Fl_I:tot:T' % (self.name, 'turb_ip'), units='K', get_remote=None)) if ip_turbine_present else 0,
+            
+            # Turbine inlet temperature for the design condition (should be the same as the target turbine inlet temperature set in the design condition)
+            t_turb_in=_float(problem.get_val('%s.%s.Fl_I:tot:T' % (self.name, 'turbine'), units=units.TEMPERATURE, get_remote=None))
         )
 
 

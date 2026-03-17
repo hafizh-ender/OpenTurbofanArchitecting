@@ -23,7 +23,6 @@ from open_turb_arch.evaluation.architecture import *
 
 __all__ = ['Weight', 'Length', 'Diameter', 'NOx', 'Noise']
 
-
 @dataclass(frozen=False)
 class Weight:
     """Calculates the weight of the integrated aircraft engine. Equations are taken from Design Methodologies
