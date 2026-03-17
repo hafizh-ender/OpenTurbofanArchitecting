@@ -165,9 +165,9 @@ class ArchitectingProblem:
 
         # Return cached evaluation results
         dv_cache = tuple(imputed_design_vector)
-        if dv_cache in self._results_cache:
-            self._last_eval_id = self._eval_id_cache[dv_cache]
-            return copy.copy(self._results_cache[dv_cache])
+        # if dv_cache in self._results_cache:
+        #     self._last_eval_id = self._eval_id_cache[dv_cache]
+        #     return copy.copy(self._results_cache[dv_cache])
 
         # Evaluate architecture
         try:
@@ -188,13 +188,13 @@ class ArchitectingProblem:
         cache = self._results_cache, self._eval_id_cache
         self._results_cache = self._eval_id_cache = None  # To prevent pickling the results cache
         eval_id = self._save_results(
-            problem=self,
+            # problem=self,
             design_vector=design_vector,
             imputed_design_vector=imputed_design_vector,
-            architecture=architecture,
             obj_values=obj_values,
             con_values=con_values,
             met_values=met_values,
+            # architecture=architecture,
         )
         self._results_cache, self._eval_id_cache = cache
 
@@ -248,6 +248,8 @@ class ArchitectingProblem:
         i_dv = 0
         is_active = np.ones((len(imputed_full_design_vector),), dtype=bool)
         for i, choice in enumerate(self.choices):
+            # print('Applying choice %s...' % choice.__class__.__name__)
+            
             n_dv = len(self._opt_des_vars[i])
             is_active_or_overwrite = choice.modify_architecture(architecture, self.analysis_problem, decoded_design_vector[i_dv:i_dv+n_dv])
 
