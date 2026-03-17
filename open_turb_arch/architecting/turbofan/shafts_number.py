@@ -45,6 +45,9 @@ class ShaftChoice(ArchitectingChoice):
     fixed_rpm_shaft_lp: float = None  # Fix the LP shaft rpm
 
     rpm_shaft_bounds: Tuple[float, float] = (1000, 20000)  # Shaft rpm bounds
+    
+    hp_rpm_shaft_bounds: Tuple[float, float] = (9000, 20000)  # HP shaft rpm bounds
+    ip_rpm_shaft_bounds: Tuple[float, float] = (3000, 9000)  # IP shaft rpm bounds
 
     inlet_p_recovery: float = None  # Pressure recovery of the inlet
     comp_hp_eff: float = None  # Efficiency of the HPC
@@ -75,11 +78,11 @@ class ShaftChoice(ArchitectingChoice):
                 fixed_value=self.fixed_pr_compressor_lp),
 
             ContinuousDesignVariable(
-                'rpm_shaft_hp', bounds=self.rpm_shaft_bounds,
+                'rpm_shaft_hp', bounds=self.hp_rpm_shaft_bounds,
                 fixed_value=self.fixed_rpm_shaft_hp),
 
             ContinuousDesignVariable(
-                'rpm_shaft_ip', bounds=self.rpm_shaft_bounds,
+                'rpm_shaft_ip', bounds=self.ip_rpm_shaft_bounds,
                 fixed_value=self.fixed_rpm_shaft_ip),
 
             ContinuousDesignVariable(
