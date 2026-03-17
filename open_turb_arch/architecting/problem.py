@@ -173,10 +173,14 @@ class ArchitectingProblem:
         initial_mass_flow = self._an_problem.design_condition.balancer._init_mass_flow
 
         # Evaluate architecture
+        print('Evaluating architecture with design vector: %s' % str(design_vector))
+        
+        print('Change initial guesses for architecture evaluation: turbine_pr=%.2f, mass_flow=%.2f kg/s' % ((imputed_design_vector[2]/imputed_design_vector[1])**(0.5), 20 * imputed_design_vector[0]))
+        self._an_problem.design_condition.balancer._init_turbine_pr = (imputed_design_vector[2]/imputed_design_vector[1])**(0.5) # (Initial guess: (OPR/FPR)^0.5)
+        self._an_problem.design_condition.balancer._init_mass_flow = 20 * imputed_design_vector[0]  # (Initial guess: mass flow proportional to fan size)
+        
         try:
-            self._an_problem.design_condition.balancer._init_turbine_pr = (imputed_design_vector[2]/imputed_design_vector[1])**(0.5) # (Initial guess: (OPR/FPR)^0.5)
-            self._an_problem.design_condition.balancer._init_mass_flow = 20 * imputed_design_vector[0]  # (Initial guess: mass flow proportional to fan size)
-            
+            print('Evaluating architecture...')
             results = self.evaluate_architecture(architecture)
             obj_values, con_values, met_values = self.extract_metrics(architecture, imputed_design_vector, results)
         except:
@@ -192,11 +196,15 @@ class ArchitectingProblem:
             met_values = np.zeros((len(self.opt_metrics),))*np.nan
         
         # Return back to initial guesses
+        print('Return to initial guesses for next evaluations: turbine_pr=%.2f, mass_flow=%.2f kg/s' % (initial_turbine_pr, initial_mass_flow))
         self._an_problem.design_condition.balancer._init_turbine_pr = initial_turbine_pr
         self._an_problem.design_condition.balancer._init_mass_flow = initial_mass_flow
+
         
-        if np.nan in obj_values:
+        if np.any(np.isnan(obj_values)):
+            print('NaN values in objectives!')
             try:
+                print('Re-evaluating architecture to check if NaN values persist...')
                 results = self.evaluate_architecture(architecture)
                 obj_values, con_values, met_values = self.extract_metrics(architecture, imputed_design_vector, results)
             except:
