@@ -201,6 +201,7 @@ class ArchitectingProblem:
                 obj_values, con_values, met_values = self.extract_metrics(architecture, imputed_design_vector, results)
             except:
                 print('Re-evaluation of architecture failed!')
+                import traceback
                 traceback.print_exc()
                 obj_values = np.zeros((len(self.opt_objectives),))*np.nan
                 con_values = np.zeros((len(self.opt_constraints),))*np.nan
