@@ -190,6 +190,12 @@ def get_architecting_problem():
             NOxMetric(),
             NoiseMetric(),
             JetMachMetric(),
+            BurnerInletTemperatureMetric(),
+            TurbineInletTemperatureMetric(),
+            P17Q7Metric(),
+            WRQAE2AMetric(),
+            DHQT41Metric(),
+            DHQT46Metric(),
         ],
         constraints=[],
         metrics=[
@@ -200,6 +206,12 @@ def get_architecting_problem():
             NOxMetric(),
             NoiseMetric(),
             JetMachMetric(),
+            BurnerInletTemperatureMetric(),
+            TurbineInletTemperatureMetric(),
+            P17Q7Metric(),
+            WRQAE2AMetric(),
+            DHQT41Metric(),
+            DHQT46Metric(),
         ],
     )
 

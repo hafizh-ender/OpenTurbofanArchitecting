@@ -190,6 +190,12 @@ def get_architecting_problem():
             NOxMetric(),
             NoiseMetric(),
             JetMachMetric(),
+            BurnerInletTemperatureMetric(),
+            TurbineInletTemperatureMetric(),
+            P17Q7Metric(),
+            WRQAE2AMetric(),
+            DHQT41Metric(),
+            DHQT46Metric(),
         ],
         constraints=[],
         metrics=[
@@ -200,6 +206,12 @@ def get_architecting_problem():
             NOxMetric(),
             NoiseMetric(),
             JetMachMetric(),
+            BurnerInletTemperatureMetric(),
+            TurbineInletTemperatureMetric(),
+            P17Q7Metric(),
+            WRQAE2AMetric(),
+            DHQT41Metric(),
+            DHQT46Metric(),
         ],
     )
 
@@ -210,7 +222,7 @@ if __name__ == '__main__':
     architecting_problem.verbose = False
     architecting_problem._max_iter = 30
     
-    save_folder = 'results_latest_morris_14'
+    save_folder = 'results_latest_morris_15'
     save_filename = 'morris_results.txt'
     # save_filename_combined = 'morris_results_combined.pkl'
     save_filename_combined = 'morris_results_combined.json'
