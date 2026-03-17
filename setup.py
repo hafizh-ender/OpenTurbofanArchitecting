@@ -42,7 +42,7 @@ if __name__ == '__main__':
         install_requires=[
             'pytest==6.2.5',
             # 'dataclasses', # only for python 3.6
-            'pycycle @ git+https://github.com/jbussemaker/pyCycle.git#egg=pycycle',
+            'pycycle @ git+https://github.com/hafizh-ender/pyCycle.git#egg=pycycle',
             'openmdao @ git+https://github.com/hafizh-ender/OpenMDAO.git@3.4.0-new',
             'ordered-set==4.0.2',
             'numpy==1.21.2',
